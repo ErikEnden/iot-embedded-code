@@ -3,9 +3,10 @@
 #include <ESP8266HTTPClient.h>
 #include <Servo.h>
 
-Servo servo;
+Servo servoRed;
+Servo servoBlue;
 
-#define timeDelay 1000 // 1 minute = 60000
+#define timeDelay 10000 // 1 minute = 60000
 
 #define DEBUG_PROG 
 
@@ -20,7 +21,7 @@ Servo servo;
 #define MIN_VALUE 25
 #define MAX_VALUE 800
 
-#define SENSOR_PIN A0 
+#define SENSOR_PIN A0
 
 #define USE_SERIAL Serial
 
@@ -34,19 +35,18 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
   WifiMulti.addAP(WifiUser, WifiPW);
-  servo.attach(2);
-  servo.write(0);
-    delay(1000);
-  
+  servoRed.attach(2);
+  servoBlue.attach(4);
+  servoRed.write(0);
+  servoBlue.write(0);
+  delay(1000);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  
-  float luxValue = 100 - ((float(analogRead(SENSOR_PIN)) - MIN_VALUE) * 100 / (MAX_VALUE - MIN_VALUE));
-  
+  // put your main code here, to run repeatedly
+
   if((WifiMulti.run() == WL_CONNECTED)){
-    sendData(String(luxValue));
+    measureLoop();
   }
 
 
@@ -61,21 +61,42 @@ void loop() {
   delay(timeDelay);
 }
 
-void sendData(String lv){
+void sendData(String lv, String sensorMode){
   HTTPClient http;
   
   String postData, httpCode;
-  http.begin("iot.ermine.ee:3000/update-level");
+  http.begin("http://iot.ermine.ee:3000/update-level");
   http.addHeader("Content-type", "application/x-www-form-urlencoded");
 
-  postData = "luxlevel=" + lv;
+  postData = "luxlevel=" + lv + "&sensormode=" + sensorMode;
   String payload = http.getString();
     
   int responseCode = http.POST(postData); 
 
   Serial.println(httpCode);
   Serial.println(payload);
-  Serial.println(lv);
+  Serial.println(postData);
     
   http.end();
+}
+
+void measureLoop() {
+  float luxValue;
+  
+  luxValue = 100 - ((float(analogRead(SENSOR_PIN)) - MIN_VALUE) * 100 / (MAX_VALUE - MIN_VALUE));
+  sendData(String(luxValue), "none");
+  rotateServo(servoRed, 90);
+  luxValue = 100 - ((float(analogRead(SENSOR_PIN)) - MIN_VALUE) * 100 / (MAX_VALUE - MIN_VALUE));
+  sendData(String(luxValue), "red");
+  rotateServo(servoRed, 0);
+  rotateServo(servoBlue, 90);
+  luxValue = 100 - ((float(analogRead(SENSOR_PIN)) - MIN_VALUE) * 100 / (MAX_VALUE - MIN_VALUE));
+  sendData(String(luxValue), "blue");
+  rotateServo(servoBlue, 0);
+}
+
+void rotateServo(Servo servo, int rotation) {
+  Serial.println("Rotating");
+  servo.write(rotation);
+  delay(1000);
 }

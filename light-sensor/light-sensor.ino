@@ -6,7 +6,7 @@
 Servo servoRed;
 Servo servoBlue;
 
-#define timeDelay 10000 // 1 minute = 60000
+#define timeDelay 1UL * 60UL * 1000UL // 60 minutes each of 60 seconds each of 1000 milliseconds all unsigned longs = 1hr
 
 #define DEBUG_PROG 
 
@@ -35,9 +35,9 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
   WifiMulti.addAP(WifiUser, WifiPW);
-  servoRed.attach(2);
-  servoBlue.attach(4);
-  servoRed.write(0);
+  servoRed.attach(4);
+  servoBlue.attach(2);
+  servoRed.write(180);
   servoBlue.write(0);
   delay(1000);
 }
@@ -85,11 +85,11 @@ void measureLoop() {
   
   luxValue = 100 - ((float(analogRead(SENSOR_PIN)) - MIN_VALUE) * 100 / (MAX_VALUE - MIN_VALUE));
   sendData(String(luxValue), "none");
-  rotateServo(servoRed, 90);
+  rotateServo(servoRed, 60);
   luxValue = 100 - ((float(analogRead(SENSOR_PIN)) - MIN_VALUE) * 100 / (MAX_VALUE - MIN_VALUE));
   sendData(String(luxValue), "red");
-  rotateServo(servoRed, 0);
-  rotateServo(servoBlue, 90);
+  rotateServo(servoRed, 180);
+  rotateServo(servoBlue, 45);
   luxValue = 100 - ((float(analogRead(SENSOR_PIN)) - MIN_VALUE) * 100 / (MAX_VALUE - MIN_VALUE));
   sendData(String(luxValue), "blue");
   rotateServo(servoBlue, 0);

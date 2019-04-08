@@ -7,7 +7,7 @@ Servo servoRed;
 Servo servoBlue;
 
 #define timeDelay 1UL * 60UL * 1000UL // 60 minutes each of 60 seconds each of 1000 milliseconds all unsigned longs = 1hr
-
+#define measurementId;
 #define DEBUG_PROG 
 
 #ifdef DEBUG_PROG
@@ -40,6 +40,7 @@ void setup() {
   servoRed.write(180);
   servoBlue.write(0);
   delay(1000);
+  measurementId = 0;
 }
 
 void loop() {
@@ -47,6 +48,7 @@ void loop() {
 
   if((WifiMulti.run() == WL_CONNECTED)){
     measureLoop();
+    measurementId += 1;
   }
 
 
@@ -68,7 +70,7 @@ void sendData(String lv, String sensorMode){
   http.begin("http://iot.ermine.ee:3000/update-level");
   http.addHeader("Content-type", "application/x-www-form-urlencoded");
 
-  postData = "luxlevel=" + lv + "&sensormode=" + sensorMode;
+  postData = "luxlevel=" + lv + "&sensormode=" + sensorMode + "&measurement=" + measurementId;
   String payload = http.getString();
     
   int responseCode = http.POST(postData); 

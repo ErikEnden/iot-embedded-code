@@ -7,7 +7,7 @@ Servo servoRed;
 Servo servoBlue;
 
 #define timeDelay 1UL * 60UL * 1000UL // 60 minutes each of 60 seconds each of 1000 milliseconds all unsigned longs = 1hr
-#define measurementId;
+#define measurementId
 #define DEBUG_PROG 
 
 #ifdef DEBUG_PROG
@@ -48,7 +48,7 @@ void loop() {
 
   if((WifiMulti.run() == WL_CONNECTED)){
     measureLoop();
-    measurementId += 1;
+    measurementId = measurementId + 1;
   }
 
 
